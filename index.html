@@ -339,9 +339,6 @@ tbody td{padding:10px 11px;font-size:12px;color:var(--gray-200);vertical-align:m
     </div>
     <button class="btn-login" onclick="doLogin()">Entrar</button>
     <div class="login-error" id="loginError">Usuário ou senha incorretos.</div>
-    <div style="text-align:center;margin-top:14px">
-      <button onclick="esqueciSenha()" style="background:none;border:none;color:var(--gray-500);font-size:12px;cursor:pointer;text-decoration:underline;font-family:'Barlow',sans-serif;transition:var(--tr)" onmouseover="this.style.color='var(--blue-bright)'" onmouseout="this.style.color='var(--gray-500)'">Esqueci minha senha</button>
-    </div>
   </div>
 </div>
 
@@ -486,7 +483,7 @@ async function apiPing() {
    DADOS EM MEMÓRIA
 ══════════════════════════════════════════════════ */
 let tx   = [];
-let acct = { username:'Lidervidros', password:'Lider@123', recoveryEmail:'' };
+let acct = { username:'Lidervidros', password:'Lider@123' };
 
 // Salva cache local (fallback offline)
 function cacheLocal() {
@@ -560,17 +557,6 @@ function fmtD(s){ if(!s)return'—'; const[y,m,d]=s.split('-'); return`${d}/${m}
 /* ══════════════════════════════════════════════════
    SEED DATA
 ══════════════════════════════════════════════════ */
-function seed(){
-  const t=tod(), data=[], todD=new Date(t);
-  const aC=d=>d&&new Date(d)<=todD;
-  const r=(desc,cat,amt,date,cons)=>data.push({id:gid(),type:'receita',description:desc,category:cat,amount:amt,date,dueDate:null,consolidated:cons,consolidatedDate:cons?date:null,paid:false,paidDate:null,notes:''});
-  const d=(tp,desc,cat,amt,date,due,cons,paid)=>{const ac=aC(due);data.push({id:gid(),type:tp,description:desc,category:cat,amount:amt,date,dueDate:due,consolidated:cons||ac,consolidatedDate:(cons||ac)?due:null,paid,paidDate:paid?due:null,notes:''});};
-  r('Venda Espelho Box 180x90','Vendas',3200,subD(t,28),true);r('Serviço Instalação Vidro Temperado','Serviços',1800,subD(t,22),true);r('Venda Janela Alumínio 3 Folhas','Vendas',2500,subD(t,15),true);r('Box de Vidro Incolor 8mm','Vendas',1950,subD(t,10),true);r('Troca Vidro Residencial','Serviços',650,subD(t,8),true);r('Espelho Bisotado 120x60','Vendas',890,subD(t,5),true);r('Vidro Para Mesa Oval','Vendas',320,subD(t,3),false);r('Instalação Vidro Comercial','Serviços',4200,subD(t,2),false);r('Venda Box Articulado','Vendas',2100,addD(t,3),false);r('Orçamento Aprovado — Fachada','Vendas',8500,addD(t,7),false);
-  d('despesa_fixa','Aluguel do Galpão','Aluguel',3500,subD(t,30),subD(t,5),true,true);d('despesa_fixa','Folha de Pagamento','Salários',8200,subD(t,25),subD(t,5),true,true);d('despesa_fixa','Contabilidade Mensal','Contabilidade',650,subD(t,25),subD(t,10),true,true);d('despesa_fixa','Internet / Telefone','Telecomunicações',280,subD(t,20),addD(t,0),true,false);d('despesa_fixa','Energia Elétrica','Utilidades',920,subD(t,15),addD(t,3),false,false);d('despesa_fixa','Seguro do Estabelecimento','Seguros',450,subD(t,10),addD(t,8),false,false);d('despesa_fixa','Pró-labore Sócio','Pró-labore',4000,subD(t,5),addD(t,10),false,false);d('despesa_fixa','Sistema Lider Vidros Finanças','Tecnologia',197,subD(t,3),addD(t,15),false,false);
-  d('despesa_variavel','Compra de Vidro Temperado 10mm','Materiais',2800,subD(t,27),subD(t,7),true,true);d('despesa_variavel','Silicone e Vedação (Estoque)','Materiais',340,subD(t,20),subD(t,5),true,true);d('despesa_variavel','Combustível Veículo Entrega','Transporte',420,subD(t,18),subD(t,3),true,false);d('despesa_variavel','Ferramentas Corte e Borda','Equipamentos',680,subD(t,12),addD(t,2),false,false);d('despesa_variavel','Imposto Simples Nacional','Impostos',1240,subD(t,8),addD(t,5),false,false);d('despesa_variavel','Material de Escritório','Administrativo',185,subD(t,5),addD(t,10),false,false);d('despesa_variavel','Reparo Caminhão Empresa','Veículos',950,subD(t,3),addD(t,12),false,false);d('despesa_variavel','Marketing — Redes Sociais','Marketing',300,subD(t,2),addD(t,15),false,false);
-  return data;
-}
-
 /* ══════════════════════════════════════════════════
    FILTER / STATUS
 ══════════════════════════════════════════════════ */
@@ -698,7 +684,6 @@ function refreshTable(){
    SETTINGS
 ══════════════════════════════════════════════════ */
 function renderSettings(){
-  const emailHtml=acct.recoveryEmail?`<strong style="color:var(--blue-bright)">${acct.recoveryEmail}</strong>`:'<em style="color:var(--gray-500)">Não configurado</em>';
   return`
   <div class="settings-grid">
     <div class="settings-card">
@@ -707,28 +692,7 @@ function renderSettings(){
       <div class="settings-info-row"><span class="settings-info-label">Usuário</span><span class="settings-info-value">${acct.username}</span></div>
       <hr class="settings-divider">
       <div class="settings-info-row"><span class="settings-info-label">Perfil</span><span class="settings-badge admin">⭐ Administrador</span></div>
-      <hr class="settings-divider">
-      <div class="settings-info-row"><span class="settings-info-label">E-mail de recuperação</span><span class="settings-info-value">${emailHtml}</span></div>
     </div>
-
-    <div class="settings-card">
-      <div class="settings-card-title">📧 E-mail de Recuperação</div>
-      <div class="settings-card-desc">Configure um e-mail para recuperação de acesso.</div>
-      <div class="form-group">
-        <label>E-mail de recuperação</label>
-        <input type="email" id="settingsEmail" value="${acct.recoveryEmail}" placeholder="exemplo@empresa.com.br">
-      </div>
-      <button class="btn-primary btn-full" onclick="saveEmail()">💾 Salvar E-mail</button>
-      ${acct.recoveryEmail?`<div style="margin-top:10px;padding:8px 12px;background:rgba(29,184,122,.08);border:1px solid rgba(29,184,122,.2);border-radius:var(--radius);font-size:12px;color:var(--green-light)">✅ E-mail ativo: <strong>${acct.recoveryEmail}</strong></div>`:''}
-    </div>
-
-    <div class="settings-card" style="grid-column:1/-1">
-      <div class="settings-card-title">🔒 Alterar Senha</div>
-      <div class="settings-card-desc">Para maior segurança, use letras maiúsculas, minúsculas, números e símbolos.</div>
-      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:13px" class="pass-grid">
-        <div class="form-group" style="margin-bottom:0"><label>Senha Atual</label><input type="password" id="pAtual" placeholder="••••••••" autocomplete="current-password"></div>
-        <div class="form-group" style="margin-bottom:0"><label>Nova Senha</label><input type="password" id="pNova" placeholder="••••••••" autocomplete="new-password" oninput="chkStr()">
-          <div class="pass-strength"><div class="pass-strength-bar" id="pStrBar"></div></div>
           <span class="pass-hint" id="pStrHint" style="color:var(--gray-500)">—</span></div>
         <div class="form-group" style="margin-bottom:0"><label>Confirmar Senha</label><input type="password" id="pConf" placeholder="••••••••" autocomplete="new-password" oninput="chkMatch()">
           <span class="pass-hint" id="pMatchHint">&nbsp;</span></div>
@@ -751,13 +715,6 @@ function renderSettings(){
       </div>
     </div>
   </div>`;
-}
-
-function saveEmail(){
-  const email=document.getElementById('settingsEmail').value.trim();
-  if(!email){toast('Informe o e-mail.','error');return;}
-  if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){toast('E-mail inválido.','error');return;}
-  acct.recoveryEmail=email;saveData({what:'acct'});toast('E-mail salvo!','success');render();
 }
 
 function chkStr(){
@@ -1123,26 +1080,6 @@ function toast(msg,type='info'){
 /* ══════════════════════════════════════════════════
    AUTH
 ══════════════════════════════════════════════════ */
-async function esqueciSenha(){
-  const u = document.getElementById('loginUser').value.trim();
-  if(!u){ toast('Informe o usuário antes de recuperar a senha.','warning'); return; }
-  const btn = document.querySelector('[onclick="esqueciSenha()"]');
-  if(btn){ btn.textContent = 'Enviando…'; btn.disabled = true; }
-  try {
-    const r = await apiCall('sendPasswordEmail');
-    if(r.success){
-      toast('Senha enviada para ' + r.email + '!', 'success');
-    } else if(r.error && r.error.includes('e-mail de recuperação')){
-      toast('Nenhum e-mail de recuperação cadastrado. Configure em Configurações.', 'error');
-    } else {
-      toast(r.error || 'Erro ao enviar e-mail.', 'error');
-    }
-  } catch(e){
-    toast('Erro de conexão ao tentar recuperar senha.', 'error');
-  }
-  if(btn){ btn.textContent = 'Esqueci minha senha'; btn.disabled = false; }
-}
-
 function doLogin(){
   const u=document.getElementById('loginUser').value.trim();
   const p=document.getElementById('loginPass').value;
@@ -1155,10 +1092,8 @@ function doLogin(){
         document.getElementById('loadingOverlay').classList.remove('hide');
         await loadData();
         autoConsolidate();
-        if(tx.length===0){ tx=seed(); saveData({what:'tx',silent:true}); }
       } catch(e) {
         console.warn('Erro no carregamento:', e);
-        if(tx.length===0) tx=seed();
       } finally {
         show('appScreen');
         document.getElementById('sidebarUser').textContent=acct.username;
