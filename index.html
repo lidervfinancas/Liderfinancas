@@ -99,8 +99,8 @@ body{font-family:'Barlow',sans-serif;background:var(--navy-950);color:var(--whit
 .topbar-titles h2{font-family:'Barlow Condensed',sans-serif;font-size:18px;font-weight:700;letter-spacing:.8px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .topbar-titles span{font-size:11px;color:var(--gray-400);display:block}
 .topbar-right{display:flex;align-items:center;gap:7px;flex-shrink:0}
-.filter-group{display:flex;background:var(--navy-800);border:1px solid rgba(255,255,255,.07);border-radius:8px;overflow:hidden}
-.filter-btn{padding:7px 13px;background:none;border:none;color:var(--gray-400);font-family:'Barlow',sans-serif;font-size:12px;font-weight:600;cursor:pointer;transition:var(--tr);border-right:1px solid rgba(255,255,255,.06);white-space:nowrap}
+.filter-group{display:flex;align-items:center;background:var(--navy-800);border:1px solid rgba(255,255,255,.07);border-radius:8px;overflow:visible;position:relative}
+.filter-btn{padding:7px 13px;background:none;border:none;color:var(--gray-400);font-family:'Barlow',sans-serif;font-size:12px;font-weight:600;cursor:pointer;transition:var(--tr);border-right:1px solid rgba(255,255,255,.06);white-space:nowrap}.filter-group>.filter-btn:first-child{border-radius:8px 0 0 8px}.filter-group>.filter-btn:last-child{border-radius:0 8px 8px 0;border-right:none}
 .filter-btn:last-child{border-right:none}
 .filter-btn:hover{color:var(--white);background:rgba(255,255,255,.05)}
 .filter-btn.active{background:var(--blue-accent);color:var(--white)}
@@ -259,7 +259,7 @@ tbody td{padding:10px 11px;font-size:12px;color:var(--gray-200);vertical-align:m
 .mfb-btn{padding:6px 13px;background:var(--navy-700);border:1px solid rgba(255,255,255,.07);border-radius:20px;color:var(--gray-400);font-family:'Barlow',sans-serif;font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap;transition:var(--tr)}
 .mfb-btn.active{background:var(--blue-accent);border-color:var(--blue-accent);color:var(--white)}
 
-.month-dropdown{position:relative}
+.month-dropdown{position:relative;border-left:1px solid rgba(255,255,255,.06)}
 .month-menu{position:absolute;top:calc(100% + 2px);right:0;background:var(--navy-700);border:1px solid rgba(255,255,255,.1);border-radius:var(--radius);min-width:140px;box-shadow:var(--shadow);z-index:200;display:none;overflow:hidden;max-height:320px;overflow-y:auto}
 .month-menu.open{display:block}
 .month-menu-item{padding:9px 15px;cursor:pointer;font-size:12px;font-weight:500;color:var(--gray-200);transition:var(--tr);border-bottom:1px solid rgba(255,255,255,.04)}
