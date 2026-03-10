@@ -693,6 +693,14 @@ function renderSettings(){
       <hr class="settings-divider">
       <div class="settings-info-row"><span class="settings-info-label">Perfil</span><span class="settings-badge admin">⭐ Administrador</span></div>
     </div>
+
+    <div class="settings-card" style="grid-column:1/-1">
+      <div class="settings-card-title">🔒 Alterar Senha</div>
+      <div class="settings-card-desc">Para maior segurança, use letras maiúsculas, minúsculas, números e símbolos.</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:13px" class="pass-grid">
+        <div class="form-group" style="margin-bottom:0"><label>Senha Atual</label><input type="password" id="pAtual" placeholder="••••••••" autocomplete="current-password"></div>
+        <div class="form-group" style="margin-bottom:0"><label>Nova Senha</label><input type="password" id="pNova" placeholder="••••••••" autocomplete="new-password" oninput="chkStr()">
+          <div class="pass-strength"><div class="pass-strength-bar" id="pStrBar"></div></div>
           <span class="pass-hint" id="pStrHint" style="color:var(--gray-500)">—</span></div>
         <div class="form-group" style="margin-bottom:0"><label>Confirmar Senha</label><input type="password" id="pConf" placeholder="••••••••" autocomplete="new-password" oninput="chkMatch()">
           <span class="pass-hint" id="pMatchHint">&nbsp;</span></div>
