@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>LiderFinance — Controle Financeiro</title>
+<title>Lider Vidros Finanças — Controle Financeiro</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Barlow:wght@300;400;500;600;700&family=Barlow+Condensed:wght@400;600;700;800&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
@@ -317,7 +317,7 @@ tbody td{padding:10px 11px;font-size:12px;color:var(--gray-200);vertical-align:m
   <div class="login-card">
     <div class="login-logo">
       <div class="logo-icon">💎</div>
-      <h1>LIDER<span>FINANCE</span></h1>
+      <h1 style="font-size:20px;letter-spacing:1px">LIDER VIDROS<span> FINANÇAS</span></h1>
       <p>Controle Financeiro Empresarial</p>
     </div>
     <div class="login-field">
@@ -330,6 +330,9 @@ tbody td{padding:10px 11px;font-size:12px;color:var(--gray-200);vertical-align:m
     </div>
     <button class="btn-login" onclick="doLogin()">Entrar</button>
     <div class="login-error" id="loginError">Usuário ou senha incorretos.</div>
+    <div style="text-align:center;margin-top:14px">
+      <button onclick="esqueciSenha()" style="background:none;border:none;color:var(--gray-500);font-size:12px;cursor:pointer;text-decoration:underline;font-family:'Barlow',sans-serif;transition:var(--tr)" onmouseover="this.style.color='var(--blue-bright)'" onmouseout="this.style.color='var(--gray-500)'">Esqueci minha senha</button>
+    </div>
   </div>
 </div>
 
@@ -339,7 +342,7 @@ tbody td{padding:10px 11px;font-size:12px;color:var(--gray-200);vertical-align:m
   <nav id="sidebar">
     <div class="sidebar-brand">
       <div class="brand-icon">💎</div>
-      <div class="brand-text"><h2>LIDERFINANCE</h2><span>Gestão Financeira</span></div>
+      <div class="brand-text"><h2>LIDER VIDROS FINANÇAS</h2><span>Gestão Financeira</span></div>
       <button class="sidebar-close-btn" onclick="closeSidebar()">×</button>
     </div>
     <div class="sidebar-nav">
@@ -424,31 +427,21 @@ tbody td{padding:10px 11px;font-size:12px;color:var(--gray-200);vertical-align:m
 const LS_ACCT = 'lf_account_cache';   // cache local da conta
 const LS_TX   = 'lf_tx_cache';        // cache local das transações
 
-let SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwv2mMzBwr9s6k7XWqg1U6DqzGCdTPAKFzxCQ6E6_Aj5vkVxUs8u_FKezE8WNDNGlib/exec';
+let SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwYVyJY5KhixjVI73cDfKgWOT1zdqQ2AaLfS8xHfFdgoBYPjmzfDuAF1KSgoJM8zF6y1w/exec';
 
 /* ══════════════════════════════════════════════════
    API — Google Sheets via Apps Script
 ══════════════════════════════════════════════════ */
-async function apiGet() {
-  const res = await fetch(SCRIPT_URL + '?action=getData', { cache: 'no-store' });
-  if (!res.ok) throw new Error('HTTP ' + res.status);
-  return res.json();
-}
-
-async function apiPost(body) {
-  // Envia sem Content-Type explícito → text/plain → sem preflight CORS
-  const res = await fetch(SCRIPT_URL, {
-    method: 'POST',
-    body: JSON.stringify(body)
-  });
+async function apiCall(action, payload) {
+  let url = SCRIPT_URL + '?action=' + action;
+  if (payload) url += '&payload=' + encodeURIComponent(JSON.stringify(payload));
+  const res = await fetch(url, { cache: 'no-store' });
   if (!res.ok) throw new Error('HTTP ' + res.status);
   return res.json();
 }
 
 async function apiPing() {
-  const res = await fetch(SCRIPT_URL + '?action=ping', { cache: 'no-store' });
-  if (!res.ok) throw new Error('HTTP ' + res.status);
-  return res.json();
+  return apiCall('ping');
 }
 
 /* ══════════════════════════════════════════════════
@@ -474,7 +467,7 @@ async function loadData() {
   setLoading('Carregando dados…');
   if (!SCRIPT_URL) { loadCache(); return; }
   try {
-    const data = await apiGet();
+    const data = await apiCall('getData');
     tx   = data.transactions || [];
     acct = { ...acct, ...(data.account || {}) };
     cacheLocal();
@@ -492,10 +485,8 @@ async function saveData({ what = 'all', silent = false } = {}) {
     if (!SCRIPT_URL) return;
     if (!silent) showSaveStatus('saving', '⟳  Salvando…');
     try {
-      const body = { action: 'saveData' };
-      if (what === 'all' || what === 'tx')   body.transactions = tx;
-      if (what === 'all' || what === 'acct') body.account      = acct;
-      await apiPost(body);
+      if (what === 'all' || what === 'tx')   await apiCall('saveTx',   { transactions: tx });
+      if (what === 'all' || what === 'acct') await apiCall('saveAcct', { account: acct });
       if (!silent) showSaveStatus('saved', '✓  Salvo');
     } catch(e) {
       if (!silent) showSaveStatus('error', '✗  Falha ao salvar');
@@ -537,7 +528,7 @@ function seed(){
   const r=(desc,cat,amt,date,cons)=>data.push({id:gid(),type:'receita',description:desc,category:cat,amount:amt,date,dueDate:null,consolidated:cons,consolidatedDate:cons?date:null,paid:false,paidDate:null,notes:''});
   const d=(tp,desc,cat,amt,date,due,cons,paid)=>{const ac=aC(due);data.push({id:gid(),type:tp,description:desc,category:cat,amount:amt,date,dueDate:due,consolidated:cons||ac,consolidatedDate:(cons||ac)?due:null,paid,paidDate:paid?due:null,notes:''});};
   r('Venda Espelho Box 180x90','Vendas',3200,subD(t,28),true);r('Serviço Instalação Vidro Temperado','Serviços',1800,subD(t,22),true);r('Venda Janela Alumínio 3 Folhas','Vendas',2500,subD(t,15),true);r('Box de Vidro Incolor 8mm','Vendas',1950,subD(t,10),true);r('Troca Vidro Residencial','Serviços',650,subD(t,8),true);r('Espelho Bisotado 120x60','Vendas',890,subD(t,5),true);r('Vidro Para Mesa Oval','Vendas',320,subD(t,3),false);r('Instalação Vidro Comercial','Serviços',4200,subD(t,2),false);r('Venda Box Articulado','Vendas',2100,addD(t,3),false);r('Orçamento Aprovado — Fachada','Vendas',8500,addD(t,7),false);
-  d('despesa_fixa','Aluguel do Galpão','Aluguel',3500,subD(t,30),subD(t,5),true,true);d('despesa_fixa','Folha de Pagamento','Salários',8200,subD(t,25),subD(t,5),true,true);d('despesa_fixa','Contabilidade Mensal','Contabilidade',650,subD(t,25),subD(t,10),true,true);d('despesa_fixa','Internet / Telefone','Telecomunicações',280,subD(t,20),addD(t,0),true,false);d('despesa_fixa','Energia Elétrica','Utilidades',920,subD(t,15),addD(t,3),false,false);d('despesa_fixa','Seguro do Estabelecimento','Seguros',450,subD(t,10),addD(t,8),false,false);d('despesa_fixa','Pró-labore Sócio','Pró-labore',4000,subD(t,5),addD(t,10),false,false);d('despesa_fixa','Sistema LiderFinance','Tecnologia',197,subD(t,3),addD(t,15),false,false);
+  d('despesa_fixa','Aluguel do Galpão','Aluguel',3500,subD(t,30),subD(t,5),true,true);d('despesa_fixa','Folha de Pagamento','Salários',8200,subD(t,25),subD(t,5),true,true);d('despesa_fixa','Contabilidade Mensal','Contabilidade',650,subD(t,25),subD(t,10),true,true);d('despesa_fixa','Internet / Telefone','Telecomunicações',280,subD(t,20),addD(t,0),true,false);d('despesa_fixa','Energia Elétrica','Utilidades',920,subD(t,15),addD(t,3),false,false);d('despesa_fixa','Seguro do Estabelecimento','Seguros',450,subD(t,10),addD(t,8),false,false);d('despesa_fixa','Pró-labore Sócio','Pró-labore',4000,subD(t,5),addD(t,10),false,false);d('despesa_fixa','Sistema Lider Vidros Finanças','Tecnologia',197,subD(t,3),addD(t,15),false,false);
   d('despesa_variavel','Compra de Vidro Temperado 10mm','Materiais',2800,subD(t,27),subD(t,7),true,true);d('despesa_variavel','Silicone e Vedação (Estoque)','Materiais',340,subD(t,20),subD(t,5),true,true);d('despesa_variavel','Combustível Veículo Entrega','Transporte',420,subD(t,18),subD(t,3),true,false);d('despesa_variavel','Ferramentas Corte e Borda','Equipamentos',680,subD(t,12),addD(t,2),false,false);d('despesa_variavel','Imposto Simples Nacional','Impostos',1240,subD(t,8),addD(t,5),false,false);d('despesa_variavel','Material de Escritório','Administrativo',185,subD(t,5),addD(t,10),false,false);d('despesa_variavel','Reparo Caminhão Empresa','Veículos',950,subD(t,3),addD(t,12),false,false);d('despesa_variavel','Marketing — Redes Sociais','Marketing',300,subD(t,2),addD(t,15),false,false);
   return data;
 }
@@ -982,7 +973,7 @@ function gerarRelatorio(){
   const items=filterAll().sort((a,b)=>(b.dueDate||b.date).localeCompare(a.dueDate||a.date));
   const rows=items.map(t=>{const s={preview:'Previsão',consolidated:'Consolidado',paid:'Quitado',overdue:'Vencido'}[getStatus(t)];const c=t.type==='receita'?'#1a8c5c':t.type==='despesa_fixa'?'#c0112a':'#b55010';return`<tr><td>${fmtD(t.dueDate||t.date)}</td><td>${{receita:'Receita',despesa_fixa:'Desp. Fixa',despesa_variavel:'Desp. Variável'}[t.type]}</td><td>${t.description}</td><td>${t.category}</td><td style="text-align:right;color:${c};font-weight:600">${t.type==='receita'?'+':'-'} ${fmt(t.amount)}</td><td>${s}</td></tr>`;}).join('');
   const w=window.open('','_blank');
-  w.document.write(`<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Relatório Gerencial</title><style>body{font-family:'Segoe UI',sans-serif;color:#1a1a2e;padding:0;margin:0;background:#fff}.page{max-width:900px;margin:0 auto;padding:36px}.logo{font-size:22px;font-weight:800;letter-spacing:2px;color:#0d1f3c}.header{display:flex;justify-content:space-between;border-bottom:3px solid #0d1f3c;padding-bottom:14px;margin-bottom:20px}.meta{font-size:12px;color:#555;text-align:right}.kpis{display:grid;grid-template-columns:repeat(3,1fr);gap:11px;margin-bottom:20px}.kpi{border:1px solid #e0e4ee;border-radius:7px;padding:11px 13px}.kpi-lbl{font-size:9px;text-transform:uppercase;letter-spacing:1px;color:#888;margin-bottom:3px}.kpi-val{font-size:18px;font-weight:700}.green{color:#1a8c5c}.red{color:#c0112a}.orange{color:#b55010}.blue{color:#0d5fa8}h2{font-size:12px;font-weight:800;background:#0d1f3c;color:#fff;padding:8px 11px;letter-spacing:1px;text-transform:uppercase;margin:18px 0 0;border-radius:4px 4px 0 0}table{width:100%;border-collapse:collapse;font-size:12px}th{background:#f0f4fc;padding:7px 10px;text-align:left;font-size:9px;letter-spacing:1px;text-transform:uppercase;color:#555}td{padding:7px 10px;border-bottom:1px solid #eef1f8}tr:nth-child(even){background:#f9fbff}.footer{margin-top:26px;text-align:center;font-size:10px;color:#aaa;border-top:1px solid #e8edf4;padding-top:9px}@media print{body{-webkit-print-color-adjust:exact}}</style></head><body><div class="page"><div class="header"><div><div class="logo">💎 LIDERFINANCE</div><div style="font-size:11px;color:#888;margin-top:3px">Relatório Gerencial Financeiro</div></div><div class="meta"><strong>Emitido:</strong> ${now}<br><strong>Período:</strong> ${pLbl()}</div></div><div class="kpis"><div class="kpi"><div class="kpi-lbl">Receitas Consol.</div><div class="kpi-val green">${fmt(T.rec.consolidated)}</div></div><div class="kpi"><div class="kpi-lbl">Despesas Consol.</div><div class="kpi-val red">${fmt(tDC)}</div></div><div class="kpi"><div class="kpi-lbl">Saldo Líquido</div><div class="kpi-val ${saldo>=0?'green':'red'}">${fmt(saldo)}</div></div><div class="kpi"><div class="kpi-lbl">Rec. Previstas</div><div class="kpi-val blue">${fmt(T.rec.preview)}</div></div><div class="kpi"><div class="kpi-lbl">Total Quitado</div><div class="kpi-val green">${fmt(T.df.paid+T.dv.paid)}</div></div><div class="kpi"><div class="kpi-lbl">Desp. Vencidas</div><div class="kpi-val orange">${fmt(ovAll.reduce((a,t)=>a+t.amount,0))}</div></div></div>${ovAll.length?`<h2>⚠ VENCIDAS</h2><table><tr><th>Venc.</th><th>Descrição</th><th>Categoria</th><th>Valor</th></tr>${ovAll.map(t=>`<tr><td>${fmtD(t.dueDate)}</td><td>${t.description}</td><td>${t.category}</td><td style="color:#c0112a;font-weight:600">${fmt(t.amount)}</td></tr>`).join('')}</table>`:''}<h2>LANÇAMENTOS</h2><table><tr><th>Data</th><th>Tipo</th><th>Descrição</th><th>Categoria</th><th>Valor</th><th>Status</th></tr>${rows}</table><div class="footer">LiderFinance · ${now}</div></div></body></html>`);
+  w.document.write(`<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Relatório Gerencial</title><style>body{font-family:'Segoe UI',sans-serif;color:#1a1a2e;padding:0;margin:0;background:#fff}.page{max-width:900px;margin:0 auto;padding:36px}.logo{font-size:22px;font-weight:800;letter-spacing:2px;color:#0d1f3c}.header{display:flex;justify-content:space-between;border-bottom:3px solid #0d1f3c;padding-bottom:14px;margin-bottom:20px}.meta{font-size:12px;color:#555;text-align:right}.kpis{display:grid;grid-template-columns:repeat(3,1fr);gap:11px;margin-bottom:20px}.kpi{border:1px solid #e0e4ee;border-radius:7px;padding:11px 13px}.kpi-lbl{font-size:9px;text-transform:uppercase;letter-spacing:1px;color:#888;margin-bottom:3px}.kpi-val{font-size:18px;font-weight:700}.green{color:#1a8c5c}.red{color:#c0112a}.orange{color:#b55010}.blue{color:#0d5fa8}h2{font-size:12px;font-weight:800;background:#0d1f3c;color:#fff;padding:8px 11px;letter-spacing:1px;text-transform:uppercase;margin:18px 0 0;border-radius:4px 4px 0 0}table{width:100%;border-collapse:collapse;font-size:12px}th{background:#f0f4fc;padding:7px 10px;text-align:left;font-size:9px;letter-spacing:1px;text-transform:uppercase;color:#555}td{padding:7px 10px;border-bottom:1px solid #eef1f8}tr:nth-child(even){background:#f9fbff}.footer{margin-top:26px;text-align:center;font-size:10px;color:#aaa;border-top:1px solid #e8edf4;padding-top:9px}@media print{body{-webkit-print-color-adjust:exact}}</style></head><body><div class="page"><div class="header"><div><div class="logo">💎 LIDER VIDROS FINANÇAS</div><div style="font-size:11px;color:#888;margin-top:3px">Relatório Gerencial Financeiro</div></div><div class="meta"><strong>Emitido:</strong> ${now}<br><strong>Período:</strong> ${pLbl()}</div></div><div class="kpis"><div class="kpi"><div class="kpi-lbl">Receitas Consol.</div><div class="kpi-val green">${fmt(T.rec.consolidated)}</div></div><div class="kpi"><div class="kpi-lbl">Despesas Consol.</div><div class="kpi-val red">${fmt(tDC)}</div></div><div class="kpi"><div class="kpi-lbl">Saldo Líquido</div><div class="kpi-val ${saldo>=0?'green':'red'}">${fmt(saldo)}</div></div><div class="kpi"><div class="kpi-lbl">Rec. Previstas</div><div class="kpi-val blue">${fmt(T.rec.preview)}</div></div><div class="kpi"><div class="kpi-lbl">Total Quitado</div><div class="kpi-val green">${fmt(T.df.paid+T.dv.paid)}</div></div><div class="kpi"><div class="kpi-lbl">Desp. Vencidas</div><div class="kpi-val orange">${fmt(ovAll.reduce((a,t)=>a+t.amount,0))}</div></div></div>${ovAll.length?`<h2>⚠ VENCIDAS</h2><table><tr><th>Venc.</th><th>Descrição</th><th>Categoria</th><th>Valor</th></tr>${ovAll.map(t=>`<tr><td>${fmtD(t.dueDate)}</td><td>${t.description}</td><td>${t.category}</td><td style="color:#c0112a;font-weight:600">${fmt(t.amount)}</td></tr>`).join('')}</table>`:''}<h2>LANÇAMENTOS</h2><table><tr><th>Data</th><th>Tipo</th><th>Descrição</th><th>Categoria</th><th>Valor</th><th>Status</th></tr>${rows}</table><div class="footer">Lider Vidros Finanças · ${now}</div></div></body></html>`);
   w.document.close();setTimeout(()=>w.print(),500);
 }
 
@@ -993,7 +984,7 @@ function gerarBalanco(){
   const S=a=>a.reduce((s,t)=>s+t.amount,0);const tR=S(aR),tDF=S(aDF),tDV=S(aDV),tD=tDF+tDV,res=tR-tD;
   const tPd=S(aDF.filter(t=>t.paid))+S(aDV.filter(t=>t.paid)),tPn=S(aDF.filter(t=>!t.paid))+S(aDV.filter(t=>!t.paid));
   const w=window.open('','_blank');
-  w.document.write(`<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Balanço Patrimonial</title><style>body{font-family:'Segoe UI',sans-serif;color:#1a1a2e;padding:0;background:#fff}.page{max-width:820px;margin:0 auto;padding:36px}.logo{font-size:22px;font-weight:800;letter-spacing:2px;color:#0d1f3c}.header{display:flex;justify-content:space-between;border-bottom:3px solid #0d1f3c;padding-bottom:14px;margin-bottom:22px}.meta{font-size:12px;color:#555;text-align:right}h2{font-size:11px;font-weight:800;background:#0d1f3c;color:#fff;padding:8px 12px;margin:16px 0 0;border-radius:4px 4px 0 0;letter-spacing:1px;text-transform:uppercase}.section{border:1px solid #d0d8e8;border-top:none;border-radius:0 0 4px 4px;margin-bottom:14px}.row{display:flex;justify-content:space-between;padding:7px 12px;font-size:12px;border-bottom:1px solid #f0f2f8}.row:last-child{border-bottom:none}.row.total{background:#f0f4fc;font-weight:700;font-size:13px}.row.resultado{background:#0d1f3c;color:#fff;font-weight:700;font-size:14px;padding:10px 12px}.green{color:#1a8c5c}.red{color:#c0112a}.obs{font-size:10px;color:#aaa;margin-top:20px;border-top:1px solid #e0e4ee;padding-top:9px;text-align:center}@media print{body{-webkit-print-color-adjust:exact}}</style></head><body><div class="page"><div class="header"><div><div class="logo">💎 LIDERFINANCE</div><div style="font-size:11px;color:#888;margin-top:3px">Balanço Patrimonial</div></div><div class="meta"><strong>Emitido:</strong> ${now}<br><strong>Base:</strong> Lançamentos Consolidados</div></div><h2>ATIVO — RECEITAS</h2><div class="section">${aR.slice(0,25).map(t=>`<div class="row"><span>${t.description} <small style="color:#aaa">(${fmtD(t.date)})</small></span><span class="green">+ ${fmt(t.amount)}</span></div>`).join('')}${aR.length>25?`<div class="row"><span>... +${aR.length-25} lançamentos</span></div>`:''}<div class="row total"><span>TOTAL RECEITAS</span><span class="green">+ ${fmt(tR)}</span></div></div><h2>PASSIVO — DESPESAS FIXAS</h2><div class="section">${aDF.map(t=>`<div class="row"><span>${t.description} <small style="color:#aaa">(${fmtD(t.dueDate)})</small> <small style="color:${t.paid?'#1a8c5c':'#c0112a'}">${t.paid?'✓ QUITADO':'● PENDENTE'}</small></span><span class="red">- ${fmt(t.amount)}</span></div>`).join('')}<div class="row total"><span>TOTAL DESP. FIXAS</span><span class="red">- ${fmt(tDF)}</span></div></div><h2>PASSIVO — DESPESAS VARIÁVEIS</h2><div class="section">${aDV.map(t=>`<div class="row"><span>${t.description} <small style="color:#aaa">(${fmtD(t.dueDate)})</small> <small style="color:${t.paid?'#1a8c5c':'#c0112a'}">${t.paid?'✓ QUITADO':'● PENDENTE'}</small></span><span class="red">- ${fmt(t.amount)}</span></div>`).join('')}<div class="row total"><span>TOTAL DESP. VARIÁVEIS</span><span class="red">- ${fmt(tDV)}</span></div></div><h2>RESULTADO</h2><div class="section"><div class="row"><span>Total Receitas</span><span class="green">+ ${fmt(tR)}</span></div><div class="row"><span>Total Despesas</span><span class="red">- ${fmt(tD)}</span></div><div class="row"><span>Desp. Quitadas</span><span class="green">${fmt(tPd)}</span></div><div class="row"><span>Desp. Pendentes</span><span class="red">${fmt(tPn)}</span></div><div class="row resultado"><span>RESULTADO DO PERÍODO</span><span style="color:${res>=0?'#4ade80':'#ff6b6b'}">${res>=0?'+ ':'- '}${fmt(Math.abs(res))}</span></div></div><div class="obs">LiderFinance · ${now}</div></div></body></html>`);
+  w.document.write(`<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Balanço Patrimonial</title><style>body{font-family:'Segoe UI',sans-serif;color:#1a1a2e;padding:0;background:#fff}.page{max-width:820px;margin:0 auto;padding:36px}.logo{font-size:22px;font-weight:800;letter-spacing:2px;color:#0d1f3c}.header{display:flex;justify-content:space-between;border-bottom:3px solid #0d1f3c;padding-bottom:14px;margin-bottom:22px}.meta{font-size:12px;color:#555;text-align:right}h2{font-size:11px;font-weight:800;background:#0d1f3c;color:#fff;padding:8px 12px;margin:16px 0 0;border-radius:4px 4px 0 0;letter-spacing:1px;text-transform:uppercase}.section{border:1px solid #d0d8e8;border-top:none;border-radius:0 0 4px 4px;margin-bottom:14px}.row{display:flex;justify-content:space-between;padding:7px 12px;font-size:12px;border-bottom:1px solid #f0f2f8}.row:last-child{border-bottom:none}.row.total{background:#f0f4fc;font-weight:700;font-size:13px}.row.resultado{background:#0d1f3c;color:#fff;font-weight:700;font-size:14px;padding:10px 12px}.green{color:#1a8c5c}.red{color:#c0112a}.obs{font-size:10px;color:#aaa;margin-top:20px;border-top:1px solid #e0e4ee;padding-top:9px;text-align:center}@media print{body{-webkit-print-color-adjust:exact}}</style></head><body><div class="page"><div class="header"><div><div class="logo">💎 LIDER VIDROS FINANÇAS</div><div style="font-size:11px;color:#888;margin-top:3px">Balanço Patrimonial</div></div><div class="meta"><strong>Emitido:</strong> ${now}<br><strong>Base:</strong> Lançamentos Consolidados</div></div><h2>ATIVO — RECEITAS</h2><div class="section">${aR.slice(0,25).map(t=>`<div class="row"><span>${t.description} <small style="color:#aaa">(${fmtD(t.date)})</small></span><span class="green">+ ${fmt(t.amount)}</span></div>`).join('')}${aR.length>25?`<div class="row"><span>... +${aR.length-25} lançamentos</span></div>`:''}<div class="row total"><span>TOTAL RECEITAS</span><span class="green">+ ${fmt(tR)}</span></div></div><h2>PASSIVO — DESPESAS FIXAS</h2><div class="section">${aDF.map(t=>`<div class="row"><span>${t.description} <small style="color:#aaa">(${fmtD(t.dueDate)})</small> <small style="color:${t.paid?'#1a8c5c':'#c0112a'}">${t.paid?'✓ QUITADO':'● PENDENTE'}</small></span><span class="red">- ${fmt(t.amount)}</span></div>`).join('')}<div class="row total"><span>TOTAL DESP. FIXAS</span><span class="red">- ${fmt(tDF)}</span></div></div><h2>PASSIVO — DESPESAS VARIÁVEIS</h2><div class="section">${aDV.map(t=>`<div class="row"><span>${t.description} <small style="color:#aaa">(${fmtD(t.dueDate)})</small> <small style="color:${t.paid?'#1a8c5c':'#c0112a'}">${t.paid?'✓ QUITADO':'● PENDENTE'}</small></span><span class="red">- ${fmt(t.amount)}</span></div>`).join('')}<div class="row total"><span>TOTAL DESP. VARIÁVEIS</span><span class="red">- ${fmt(tDV)}</span></div></div><h2>RESULTADO</h2><div class="section"><div class="row"><span>Total Receitas</span><span class="green">+ ${fmt(tR)}</span></div><div class="row"><span>Total Despesas</span><span class="red">- ${fmt(tD)}</span></div><div class="row"><span>Desp. Quitadas</span><span class="green">${fmt(tPd)}</span></div><div class="row"><span>Desp. Pendentes</span><span class="red">${fmt(tPn)}</span></div><div class="row resultado"><span>RESULTADO DO PERÍODO</span><span style="color:${res>=0?'#4ade80':'#ff6b6b'}">${res>=0?'+ ':'- '}${fmt(Math.abs(res))}</span></div></div><div class="obs">Lider Vidros Finanças · ${now}</div></div></body></html>`);
   w.document.close();setTimeout(()=>w.print(),500);
 }
 
@@ -1011,6 +1002,26 @@ function toast(msg,type='info'){
 /* ══════════════════════════════════════════════════
    AUTH
 ══════════════════════════════════════════════════ */
+async function esqueciSenha(){
+  const u = document.getElementById('loginUser').value.trim();
+  if(!u){ toast('Informe o usuário antes de recuperar a senha.','warning'); return; }
+  const btn = document.querySelector('[onclick="esqueciSenha()"]');
+  if(btn){ btn.textContent = 'Enviando…'; btn.disabled = true; }
+  try {
+    const r = await apiCall('sendPasswordEmail');
+    if(r.success){
+      toast('Senha enviada para ' + r.email + '!', 'success');
+    } else if(r.error && r.error.includes('e-mail de recuperação')){
+      toast('Nenhum e-mail de recuperação cadastrado. Configure em Configurações.', 'error');
+    } else {
+      toast(r.error || 'Erro ao enviar e-mail.', 'error');
+    }
+  } catch(e){
+    toast('Erro de conexão ao tentar recuperar senha.', 'error');
+  }
+  if(btn){ btn.textContent = 'Esqueci minha senha'; btn.disabled = false; }
+}
+
 function doLogin(){
   const u=document.getElementById('loginUser').value.trim();
   const p=document.getElementById('loginPass').value;
