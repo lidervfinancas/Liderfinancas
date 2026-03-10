@@ -259,6 +259,15 @@ tbody td{padding:10px 11px;font-size:12px;color:var(--gray-200);vertical-align:m
 .mfb-btn{padding:6px 13px;background:var(--navy-700);border:1px solid rgba(255,255,255,.07);border-radius:20px;color:var(--gray-400);font-family:'Barlow',sans-serif;font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap;transition:var(--tr)}
 .mfb-btn.active{background:var(--blue-accent);border-color:var(--blue-accent);color:var(--white)}
 
+.month-dropdown{position:relative}
+.month-menu{position:absolute;top:calc(100% + 2px);right:0;background:var(--navy-700);border:1px solid rgba(255,255,255,.1);border-radius:var(--radius);min-width:140px;box-shadow:var(--shadow);z-index:200;display:none;overflow:hidden;max-height:320px;overflow-y:auto}
+.month-menu.open{display:block}
+.month-menu-item{padding:9px 15px;cursor:pointer;font-size:12px;font-weight:500;color:var(--gray-200);transition:var(--tr);border-bottom:1px solid rgba(255,255,255,.04)}
+.month-menu-item:last-child{border-bottom:none}
+.month-menu-item:hover{background:rgba(45,125,210,.14);color:var(--white)}
+.month-menu-item.active{background:rgba(45,125,210,.2);color:var(--blue-bright);font-weight:700}
+#filter-month-btn.active{background:var(--blue-accent);color:var(--white)}
+
 /* ── SCROLLBAR ── */
 ::-webkit-scrollbar{width:5px;height:5px}
 ::-webkit-scrollbar-track{background:transparent}
@@ -377,6 +386,23 @@ tbody td{padding:10px 11px;font-size:12px;color:var(--gray-200);vertical-align:m
           <button class="filter-btn" onclick="setFilter('15dias')" id="filter-15dias">15 Dias</button>
           <button class="filter-btn active" onclick="setFilter('mes')" id="filter-mes">Mês</button>
           <button class="filter-btn" onclick="setFilter('ano')" id="filter-ano">Ano</button>
+          <div class="month-dropdown" id="monthDropdown">
+            <button class="filter-btn" onclick="toggleMonthMenu()" id="filter-month-btn">📅 Mês ▾</button>
+            <div class="month-menu" id="monthMenu">
+              <div class="month-menu-item" onclick="setFilter('m01')">Janeiro</div>
+              <div class="month-menu-item" onclick="setFilter('m02')">Fevereiro</div>
+              <div class="month-menu-item" onclick="setFilter('m03')">Março</div>
+              <div class="month-menu-item" onclick="setFilter('m04')">Abril</div>
+              <div class="month-menu-item" onclick="setFilter('m05')">Maio</div>
+              <div class="month-menu-item" onclick="setFilter('m06')">Junho</div>
+              <div class="month-menu-item" onclick="setFilter('m07')">Julho</div>
+              <div class="month-menu-item" onclick="setFilter('m08')">Agosto</div>
+              <div class="month-menu-item" onclick="setFilter('m09')">Setembro</div>
+              <div class="month-menu-item" onclick="setFilter('m10')">Outubro</div>
+              <div class="month-menu-item" onclick="setFilter('m11')">Novembro</div>
+              <div class="month-menu-item" onclick="setFilter('m12')">Dezembro</div>
+            </div>
+          </div>
         </div>
         <div class="pdf-dropdown" id="pdfDropdown">
           <button class="btn-pdf" onclick="togglePdfMenu()">📄 <span class="pdf-lbl">Relatórios</span> ▾</button>
@@ -389,8 +415,20 @@ tbody td{padding:10px 11px;font-size:12px;color:var(--gray-200);vertical-align:m
     </div>
     <div class="mobile-filter-bar" id="mobileFilterBar">
       <button class="mfb-btn" onclick="setFilter('15dias')" id="mfilter-15dias">⏱ 15 Dias</button>
-      <button class="mfb-btn active" onclick="setFilter('mes')" id="mfilter-mes">📅 Mês</button>
+      <button class="mfb-btn active" onclick="setFilter('mes')" id="mfilter-mes">📅 Mês Atual</button>
       <button class="mfb-btn" onclick="setFilter('ano')" id="mfilter-ano">📆 Ano</button>
+      <button class="mfb-btn" onclick="setFilter('m01')" id="mfilter-m01">Jan</button>
+      <button class="mfb-btn" onclick="setFilter('m02')" id="mfilter-m02">Fev</button>
+      <button class="mfb-btn" onclick="setFilter('m03')" id="mfilter-m03">Mar</button>
+      <button class="mfb-btn" onclick="setFilter('m04')" id="mfilter-m04">Abr</button>
+      <button class="mfb-btn" onclick="setFilter('m05')" id="mfilter-m05">Mai</button>
+      <button class="mfb-btn" onclick="setFilter('m06')" id="mfilter-m06">Jun</button>
+      <button class="mfb-btn" onclick="setFilter('m07')" id="mfilter-m07">Jul</button>
+      <button class="mfb-btn" onclick="setFilter('m08')" id="mfilter-m08">Ago</button>
+      <button class="mfb-btn" onclick="setFilter('m09')" id="mfilter-m09">Set</button>
+      <button class="mfb-btn" onclick="setFilter('m10')" id="mfilter-m10">Out</button>
+      <button class="mfb-btn" onclick="setFilter('m11')" id="mfilter-m11">Nov</button>
+      <button class="mfb-btn" onclick="setFilter('m12')" id="mfilter-m12">Dez</button>
     </div>
     <div class="tab-nav" id="tabNav">
       <button class="tab-btn active" onclick="setTab('indicadores')" id="tab-indicadores">📈 Indicadores</button>
@@ -542,6 +580,12 @@ function range(){
   const t=new Date(tod());
   if(appState.filter==='15dias'){const f=new Date(t);f.setDate(f.getDate()-15);return{from:f,to:new Date(t.getTime()+86400000*30)};}
   if(appState.filter==='mes') return{from:new Date(t.getFullYear(),t.getMonth(),1),to:new Date(t.getFullYear(),t.getMonth()+1,0)};
+  if(appState.filter==='ano') return{from:new Date(t.getFullYear(),0,1),to:new Date(t.getFullYear(),11,31)};
+  if(appState.filter.startsWith('m')&&appState.filter.length===3){
+    const mo=parseInt(appState.filter.substr(1))-1;
+    const yr=t.getFullYear();
+    return{from:new Date(yr,mo,1),to:new Date(yr,mo+1,0)};
+  }
   return{from:new Date(t.getFullYear(),0,1),to:new Date(t.getFullYear(),11,31)};
 }
 function inR(ds){if(!ds)return false;const d=new Date(ds);const{from,to}=range();return d>=from&&d<=to;}
@@ -589,13 +633,41 @@ function setTab(tab){
   render();
 }
 
+const MONTH_NAMES = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+
 function setFilter(f){
   appState.filter=f;
+  // desktop pills
   ['15dias','mes','ano'].forEach(k=>{
     document.getElementById('filter-'+k)?.classList.toggle('active',k===f);
+  });
+  // mobile pills
+  ['15dias','mes','ano','m01','m02','m03','m04','m05','m06','m07','m08','m09','m10','m11','m12'].forEach(k=>{
     document.getElementById('mfilter-'+k)?.classList.toggle('active',k===f);
   });
+  // month dropdown button
+  const isMonth = f.startsWith('m') && f.length===3;
+  const monthBtn = document.getElementById('filter-month-btn');
+  if(monthBtn){
+    monthBtn.classList.toggle('active', isMonth);
+    if(isMonth){
+      const idx = parseInt(f.substr(1))-1;
+      monthBtn.textContent = MONTH_NAMES[idx] + ' ▾';
+    } else {
+      monthBtn.textContent = '📅 Mês ▾';
+    }
+  }
+  // month menu items highlight
+  document.querySelectorAll('.month-menu-item').forEach((el,i)=>{
+    const k='m'+(String(i+1).padStart(2,'0'));
+    el.classList.toggle('active',k===f);
+  });
+  document.getElementById('monthMenu')?.classList.remove('open');
   render();
+}
+
+function toggleMonthMenu(){
+  document.getElementById('monthMenu').classList.toggle('open');
 }
 
 function openSidebar(){document.getElementById('sidebar').classList.add('open');document.getElementById('sidebarOverlay').classList.add('open');document.body.style.overflow='hidden';}
@@ -962,8 +1034,19 @@ function initCharts(){
    PDF
 ══════════════════════════════════════════════════ */
 function togglePdfMenu(){document.getElementById('pdfMenu').classList.toggle('open');}
-document.addEventListener('click',e=>{if(!e.target.closest('#pdfDropdown'))document.getElementById('pdfMenu')?.classList.remove('open');});
-function pLbl(){return{'15dias':'Últimos 15 Dias','mes':'Mês Atual','ano':'Ano Atual'}[appState.filter];}
+document.addEventListener('click',e=>{
+  if(!e.target.closest('#pdfDropdown')) document.getElementById('pdfMenu')?.classList.remove('open');
+  if(!e.target.closest('#monthDropdown')) document.getElementById('monthMenu')?.classList.remove('open');
+});
+function pLbl(){
+  if(appState.filter==='15dias') return 'Últimos 15 Dias';
+  if(appState.filter==='mes')    return 'Mês Atual';
+  if(appState.filter==='ano')    return 'Ano Atual';
+  if(appState.filter.startsWith('m')&&appState.filter.length===3){
+    return MONTH_NAMES[parseInt(appState.filter.substr(1))-1]+' '+new Date().getFullYear();
+  }
+  return 'Período Selecionado';
+}
 
 function gerarRelatorio(){
   document.getElementById('pdfMenu').classList.remove('open');
