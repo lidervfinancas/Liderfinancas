@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>Pecunia — Gestão Financeira</title>
+<title>REFLEX — Gestão de Finanças Pessoais</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Barlow:wght@300;400;500;600;700&family=Barlow+Condensed:wght@400;600;700;800&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
@@ -325,9 +325,9 @@ tbody td{padding:10px 11px;font-size:12px;color:var(--gray-200);vertical-align:m
 <div id="loginScreen">
   <div class="login-card">
     <div class="login-logo">
-      <div class="logo-icon">🏛️</div>
-      <h1 style="font-size:26px;letter-spacing:4px">PECV<span>NIA</span></h1>
-      <p style="font-size:11px;color:var(--gray-400);letter-spacing:2px;text-transform:uppercase;margin-top:4px">Gestão Financeira</p>
+      <div class="logo-icon">💼</div>
+      <h1 style="font-size:28px;letter-spacing:3px">REF<span>LEX</span></h1>
+      <p style="font-size:10px;color:var(--gray-400);letter-spacing:1.5px;text-transform:uppercase;margin-top:4px">Gestão de Finanças Pessoais</p>
     </div>
     <div class="login-field">
       <label>Usuário</label>
@@ -347,8 +347,8 @@ tbody td{padding:10px 11px;font-size:12px;color:var(--gray-200);vertical-align:m
   <div id="sidebarOverlay" onclick="closeSidebar()"></div>
   <nav id="sidebar">
     <div class="sidebar-brand">
-      <div class="brand-icon">🏛️</div>
-      <div class="brand-text"><h2>PECUNIA</h2><span>Gestão Financeira</span></div>
+      <div class="brand-icon">💼</div>
+      <div class="brand-text"><h2>REFLEX</h2><span>Gestão de Finanças Pessoais</span></div>
       <button class="sidebar-close-btn" onclick="closeSidebar()">×</button>
     </div>
     <div class="sidebar-nav">
@@ -380,11 +380,8 @@ tbody td{padding:10px 11px;font-size:12px;color:var(--gray-200);vertical-align:m
       </div>
       <div class="topbar-right">
         <div class="filter-group">
-          <button class="filter-btn" onclick="setFilter('15dias')" id="filter-15dias">15 Dias</button>
-          <button class="filter-btn active" onclick="setFilter('mes')" id="filter-mes">Mês</button>
-          <button class="filter-btn" onclick="setFilter('ano')" id="filter-ano">Ano</button>
           <div class="month-dropdown" id="monthDropdown">
-            <button class="filter-btn" onclick="toggleMonthMenu()" id="filter-month-btn">📅 Mês ▾</button>
+            <button class="filter-btn active" onclick="toggleMonthMenu()" id="filter-month-btn">📅 Mês ▾</button>
             <div class="month-menu" id="monthMenu">
               <div class="month-menu-item" onclick="setFilter('m01')">Janeiro</div>
               <div class="month-menu-item" onclick="setFilter('m02')">Fevereiro</div>
@@ -400,6 +397,10 @@ tbody td{padding:10px 11px;font-size:12px;color:var(--gray-200);vertical-align:m
               <div class="month-menu-item" onclick="setFilter('m12')">Dezembro</div>
             </div>
           </div>
+          <div class="month-dropdown" id="yearDropdown">
+            <button class="filter-btn" onclick="toggleYearMenu()" id="filter-year-btn">📆 Ano ▾</button>
+            <div class="month-menu" id="yearMenu"></div>
+          </div>
         </div>
         <div class="pdf-dropdown" id="pdfDropdown">
           <button class="btn-pdf" onclick="togglePdfMenu()">📄 <span class="pdf-lbl">Relatórios</span> ▾</button>
@@ -411,9 +412,6 @@ tbody td{padding:10px 11px;font-size:12px;color:var(--gray-200);vertical-align:m
       </div>
     </div>
     <div class="mobile-filter-bar" id="mobileFilterBar">
-      <button class="mfb-btn" onclick="setFilter('15dias')" id="mfilter-15dias">⏱ 15 Dias</button>
-      <button class="mfb-btn active" onclick="setFilter('mes')" id="mfilter-mes">📅 Mês Atual</button>
-      <button class="mfb-btn" onclick="setFilter('ano')" id="mfilter-ano">📆 Ano</button>
       <button class="mfb-btn" onclick="setFilter('m01')" id="mfilter-m01">Jan</button>
       <button class="mfb-btn" onclick="setFilter('m02')" id="mfilter-m02">Fev</button>
       <button class="mfb-btn" onclick="setFilter('m03')" id="mfilter-m03">Mar</button>
@@ -426,6 +424,9 @@ tbody td{padding:10px 11px;font-size:12px;color:var(--gray-200);vertical-align:m
       <button class="mfb-btn" onclick="setFilter('m10')" id="mfilter-m10">Out</button>
       <button class="mfb-btn" onclick="setFilter('m11')" id="mfilter-m11">Nov</button>
       <button class="mfb-btn" onclick="setFilter('m12')" id="mfilter-m12">Dez</button>
+      <span style="width:1px;background:rgba(255,255,255,.1);flex-shrink:0;align-self:stretch"></span>
+      <button class="mfb-btn" id="mfilter-year-btn" onclick="toggleMobileYearMenu()">📆 Ano ▾</button>
+      <div class="month-menu" id="mobileYearMenu" style="position:absolute;top:52px;left:auto;right:10px;z-index:200;display:none"></div>
     </div>
     <div class="tab-nav" id="tabNav">
       <button class="tab-btn active" onclick="setTab('indicadores')" id="tab-indicadores">📈 Indicadores</button>
@@ -560,19 +561,23 @@ function fmtD(s){ if(!s)return'—'; const[y,m,d]=s.split('-'); return`${d}/${m}
 /* ══════════════════════════════════════════════════
    FILTER / STATUS
 ══════════════════════════════════════════════════ */
-let appState = { section:'visaoGeral', tab:'indicadores', filter:'mes', search:'' };
+const _cm = String(new Date().getMonth()+1).padStart(2,'0');
+let appState = { section:'visaoGeral', tab:'indicadores', filter:'m'+_cm, search:'' };
 
 function range(){
   const t=new Date(tod());
-  if(appState.filter==='15dias'){const f=new Date(t);f.setDate(f.getDate()-15);return{from:f,to:new Date(t.getTime()+86400000*30)};}
-  if(appState.filter==='mes') return{from:new Date(t.getFullYear(),t.getMonth(),1),to:new Date(t.getFullYear(),t.getMonth()+1,0)};
-  if(appState.filter==='ano') return{from:new Date(t.getFullYear(),0,1),to:new Date(t.getFullYear(),11,31)};
-  if(appState.filter.startsWith('m')&&appState.filter.length===3){
-    const mo=parseInt(appState.filter.substr(1))-1;
+  const f=appState.filter;
+  if(f.startsWith('m')&&f.length===3){
+    const mo=parseInt(f.substr(1))-1;
     const yr=t.getFullYear();
     return{from:new Date(yr,mo,1),to:new Date(yr,mo+1,0)};
   }
-  return{from:new Date(t.getFullYear(),0,1),to:new Date(t.getFullYear(),11,31)};
+  if(f.startsWith('y')&&f.length===5){
+    const yr=parseInt(f.substr(1));
+    return{from:new Date(yr,0,1),to:new Date(yr,11,31)};
+  }
+  // default: current month
+  return{from:new Date(t.getFullYear(),t.getMonth(),1),to:new Date(t.getFullYear(),t.getMonth()+1,0)};
 }
 function inR(ds){if(!ds)return false;const d=new Date(ds);const{from,to}=range();return d>=from&&d<=to;}
 function filterTx(type){return tx.filter(t=>{if(type&&t.type!==type)return false;if(!inR(t.dueDate||t.date))return false;if(appState.search){const q=appState.search.toLowerCase();return t.description.toLowerCase().includes(q)||t.category.toLowerCase().includes(q);}return true;});}
@@ -621,39 +626,74 @@ function setTab(tab){
 
 const MONTH_NAMES = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
 
+function getYears(){
+  const yrs=[...new Set(tx.map(t=>(t.dueDate||t.date).substr(0,4)))].sort().reverse();
+  const cy=new Date().getFullYear().toString();
+  if(!yrs.includes(cy)) yrs.unshift(cy);
+  return yrs;
+}
+
+function buildYearMenuHTML(isMobile){
+  return getYears().map(y=>`<div class="month-menu-item${appState.filter==='y'+y?' active':''}" onclick="setFilter('y${y}');${isMobile?'toggleMobileYearMenu()':'toggleYearMenu()'}">${y}</div>`).join('');
+}
+
 function setFilter(f){
   appState.filter=f;
-  // desktop pills
-  ['15dias','mes','ano'].forEach(k=>{
-    document.getElementById('filter-'+k)?.classList.toggle('active',k===f);
-  });
-  // mobile pills
-  ['15dias','mes','ano','m01','m02','m03','m04','m05','m06','m07','m08','m09','m10','m11','m12'].forEach(k=>{
-    document.getElementById('mfilter-'+k)?.classList.toggle('active',k===f);
-  });
-  // month dropdown button
   const isMonth = f.startsWith('m') && f.length===3;
+  const isYear  = f.startsWith('y') && f.length===5;
+
+  // desktop month button
   const monthBtn = document.getElementById('filter-month-btn');
   if(monthBtn){
     monthBtn.classList.toggle('active', isMonth);
-    if(isMonth){
-      const idx = parseInt(f.substr(1))-1;
-      monthBtn.textContent = MONTH_NAMES[idx] + ' ▾';
-    } else {
-      monthBtn.textContent = '📅 Mês ▾';
-    }
+    monthBtn.textContent = isMonth ? (MONTH_NAMES[parseInt(f.substr(1))-1]+' ▾') : '📅 Mês ▾';
   }
-  // month menu items highlight
-  document.querySelectorAll('.month-menu-item').forEach((el,i)=>{
-    const k='m'+(String(i+1).padStart(2,'0'));
-    el.classList.toggle('active',k===f);
+  // desktop year button
+  const yearBtn = document.getElementById('filter-year-btn');
+  if(yearBtn){
+    yearBtn.classList.toggle('active', isYear);
+    yearBtn.textContent = isYear ? (f.substr(1)+' ▾') : '📆 Ano ▾';
+  }
+  // mobile month pills
+  ['m01','m02','m03','m04','m05','m06','m07','m08','m09','m10','m11','m12'].forEach(k=>{
+    document.getElementById('mfilter-'+k)?.classList.toggle('active',k===f);
   });
+  // mobile year button
+  const myb = document.getElementById('mfilter-year-btn');
+  if(myb){ myb.classList.toggle('active', isYear); myb.textContent = isYear?(f.substr(1)+' ▾'):'📆 Ano ▾'; }
+
+  // highlight menu items
+  document.querySelectorAll('.month-menu-item').forEach(el=>{
+    const v = el.getAttribute('onclick')?.match(/setFilter\('([^']+)'\)/)?.[1];
+    el.classList.toggle('active', v===f);
+  });
+
   document.getElementById('monthMenu')?.classList.remove('open');
+  document.getElementById('yearMenu')?.classList.remove('open');
+  document.getElementById('mobileYearMenu').style.display='none';
   render();
 }
 
 function toggleMonthMenu(){
-  document.getElementById('monthMenu').classList.toggle('open');
+  const m=document.getElementById('monthMenu');
+  const wasOpen=m.classList.contains('open');
+  document.getElementById('yearMenu')?.classList.remove('open');
+  m.classList.toggle('open',!wasOpen);
+}
+
+function toggleYearMenu(){
+  const m=document.getElementById('yearMenu');
+  const wasOpen=m.classList.contains('open');
+  document.getElementById('monthMenu')?.classList.remove('open');
+  m.innerHTML=buildYearMenuHTML(false);
+  m.classList.toggle('open',!wasOpen);
+}
+
+function toggleMobileYearMenu(){
+  const m=document.getElementById('mobileYearMenu');
+  const wasOpen=m.style.display==='block';
+  m.innerHTML=buildYearMenuHTML(true);
+  m.style.display=wasOpen?'none':'block';
 }
 
 function openSidebar(){document.getElementById('sidebar').classList.add('open');document.getElementById('sidebarOverlay').classList.add('open');document.body.style.overflow='hidden';}
@@ -779,22 +819,97 @@ function renderIndicadores(){
   return'';
 }
 
+// Retorna despesas consolidadas, vencidas e não pagas de ANTES do período atual
+function getArrastes(){
+  const f=appState.filter;
+  // só faz sentido calcular arraste para filtros de mês
+  if(!(f.startsWith('m')&&f.length===3)) return [];
+  const yr  = new Date().getFullYear();
+  const mo  = parseInt(f.substr(1))-1; // 0-based
+  const limiteInicio = new Date(yr, mo, 1); // início do mês atual no filtro
+  return tx.filter(d=>{
+    if(d.type==='receita') return false;
+    if(d.paid) return false;
+    if(!d.consolidated) return false;
+    if(!d.dueDate) return false;
+    const due = new Date(d.dueDate);
+    return due < limiteInicio; // venceu antes do mês visualizado
+  });
+}
+
 function indGeral(){
   const T=totals();const tDC=T.df.consolidated+T.dv.consolidated,saldo=T.rec.consolidated-tDC;
   const ovAll=[...T.df.overdue,...T.dv.overdue];
+  const arrastes=getArrastes();
+  const totalArraste=arrastes.reduce((a,t)=>a+t.amount,0);
+  const saldoReal=saldo-totalArraste;
   return`
   <div class="kpi-grid">
     <div class="kpi-card green"><div class="kpi-icon">💰</div><div class="kpi-label">Receitas Consolidadas</div><div class="kpi-value green">${fmt(T.rec.consolidated)}</div><div class="kpi-sub">Prev.: ${fmt(T.rec.preview)}</div></div>
     <div class="kpi-card red"><div class="kpi-icon">📤</div><div class="kpi-label">Despesas Consolidadas</div><div class="kpi-value red">${fmt(tDC)}</div><div class="kpi-sub">Prev.: ${fmt(T.df.preview+T.dv.preview)}</div></div>
-    <div class="kpi-card blue"><div class="kpi-icon">⚖️</div><div class="kpi-label">Saldo Líquido</div><div class="kpi-value ${saldo>=0?'green':'red'}">${fmt(saldo)}</div><div class="kpi-sub">Proj.: ${fmt(T.rec.total-(T.df.total+T.dv.total))}</div></div>
+    <div class="kpi-card blue"><div class="kpi-icon">⚖️</div><div class="kpi-label">Saldo do Período</div><div class="kpi-value ${saldo>=0?'green':'red'}">${fmt(saldo)}</div><div class="kpi-sub">Sem arrastes do mês anterior</div></div>
     <div class="kpi-card gold"><div class="kpi-icon">✅</div><div class="kpi-label">Total Quitado</div><div class="kpi-value gold">${fmt(T.df.paid+T.dv.paid)}</div><div class="kpi-sub">Pagamentos confirmados</div></div>
     <div class="kpi-card orange"><div class="kpi-icon">⚠️</div><div class="kpi-label">Despesas Vencidas</div><div class="kpi-value orange">${fmt(ovAll.reduce((a,t)=>a+t.amount,0))}</div><div class="kpi-sub">${ovAll.length} lançamento(s)</div></div>
-    <div class="kpi-card blue"><div class="kpi-icon">📊</div><div class="kpi-label">Margem Operacional</div><div class="kpi-value">${T.rec.consolidated>0?((saldo/T.rec.consolidated)*100).toFixed(1)+'%':'—'}</div><div class="kpi-sub">Sobre rec. consolidada</div></div>
+    <div class="kpi-card ${saldoReal>=0?'green':'red'}"><div class="kpi-icon">🧾</div><div class="kpi-label">Saldo Real (c/ Arrastes)</div><div class="kpi-value ${saldoReal>=0?'green':'red'}">${fmt(saldoReal)}</div><div class="kpi-sub">Inclui pendências anteriores</div></div>
   </div>
+  ${cardArrastes(arrastes, totalArraste)}
+  ${vencHoje()}
   <div class="charts-grid">
     <div class="chart-card"><div class="chart-title">Receitas × Despesas</div><div class="chart-wrap"><canvas id="cGB"></canvas></div></div>
     <div class="chart-card"><div class="chart-title">Composição Despesas</div><div class="chart-wrap"><canvas id="cDP"></canvas></div></div>
     <div class="chart-card full"><div class="chart-title">Fluxo de Caixa — 6 Meses</div><div class="chart-wrap" style="height:200px"><canvas id="cFL"></canvas></div></div>
+  </div>`;
+}
+
+function cardArrastes(arrastes, total){
+  if(!arrastes.length) return '';
+  const rows = arrastes
+    .sort((a,b)=>a.dueDate.localeCompare(b.dueDate))
+    .map(d=>`
+    <div class="indicator-row">
+      <div>
+        <div style="font-size:13px;color:var(--white);font-weight:500">${d.description}</div>
+        <div style="font-size:11px;color:var(--gray-400)">${d.category} · Venceu ${fmtD(d.dueDate)}</div>
+      </div>
+      <div style="text-align:right">
+        <div class="indicator-value" style="color:var(--orange)">${fmt(d.amount)}</div>
+        <div style="font-size:10px;margin-top:2px">${badge(getStatus(d))}</div>
+      </div>
+    </div>`).join('');
+  return`
+  <div class="chart-card" style="margin-bottom:13px;border-color:rgba(224,120,32,.3);background:linear-gradient(135deg,var(--navy-800),rgba(224,120,32,.04))">
+    <div class="chart-title" style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">
+      <span style="color:var(--orange)">↩ Arrastes de Meses Anteriores</span>
+      <span style="font-family:'Barlow Condensed',sans-serif;font-size:14px;color:var(--orange);font-weight:700">${fmt(total)}</span>
+    </div>
+    <div style="font-size:11px;color:var(--gray-500);margin-bottom:10px">${arrastes.length} despesa(s) consolidada(s), vencida(s) e não quitada(s) de períodos anteriores</div>
+    ${rows}
+  </div>`;
+}
+
+function vencHoje(){
+  const t=tod();
+  const items=tx.filter(d=>(d.type==='despesa_fixa'||d.type==='despesa_variavel')&&d.dueDate===t&&!d.paid);
+  if(!items.length) return '';
+  const total=items.reduce((a,x)=>a+x.amount,0);
+  const rows=items.map(d=>`
+    <div class="indicator-row">
+      <div>
+        <div style="font-size:13px;color:var(--white);font-weight:500">${d.description}</div>
+        <div style="font-size:11px;color:var(--gray-400)">${d.category} · ${d.type==='despesa_fixa'?'Fixa':'Variável'}</div>
+      </div>
+      <div style="text-align:right">
+        <div class="indicator-value" style="color:var(--red-light)">${fmt(d.amount)}</div>
+        <div style="font-size:10px;color:var(--gray-500)">${badge(getStatus(d))}</div>
+      </div>
+    </div>`).join('');
+  return`
+  <div class="chart-card" style="margin-bottom:13px;border-color:rgba(224,48,80,.25)">
+    <div class="chart-title" style="display:flex;justify-content:space-between;align-items:center">
+      <span>🔔 Vencimentos Hoje — ${fmtD(t)}</span>
+      <span style="font-family:'Barlow Condensed',sans-serif;font-size:14px;color:var(--red-light);font-weight:700">${fmt(total)}</span>
+    </div>
+    ${rows}
   </div>`;
 }
 
@@ -1000,16 +1115,15 @@ function initCharts(){
 ══════════════════════════════════════════════════ */
 function togglePdfMenu(){document.getElementById('pdfMenu').classList.toggle('open');}
 document.addEventListener('click',e=>{
-  if(!e.target.closest('#pdfDropdown')) document.getElementById('pdfMenu')?.classList.remove('open');
+  if(!e.target.closest('#pdfDropdown'))  document.getElementById('pdfMenu')?.classList.remove('open');
   if(!e.target.closest('#monthDropdown')) document.getElementById('monthMenu')?.classList.remove('open');
+  if(!e.target.closest('#yearDropdown'))  document.getElementById('yearMenu')?.classList.remove('open');
+  if(!e.target.closest('#mobileFilterBar')) document.getElementById('mobileYearMenu').style.display='none';
 });
 function pLbl(){
-  if(appState.filter==='15dias') return 'Últimos 15 Dias';
-  if(appState.filter==='mes')    return 'Mês Atual';
-  if(appState.filter==='ano')    return 'Ano Atual';
-  if(appState.filter.startsWith('m')&&appState.filter.length===3){
-    return MONTH_NAMES[parseInt(appState.filter.substr(1))-1]+' '+new Date().getFullYear();
-  }
+  const f=appState.filter;
+  if(f.startsWith('m')&&f.length===3) return MONTH_NAMES[parseInt(f.substr(1))-1]+' '+new Date().getFullYear();
+  if(f.startsWith('y')&&f.length===5) return 'Ano '+f.substr(1);
   return 'Período Selecionado';
 }
 
@@ -1021,7 +1135,7 @@ function gerarRelatorio(){
   const items=filterAll().sort((a,b)=>(b.dueDate||b.date).localeCompare(a.dueDate||a.date));
   const rows=items.map(t=>{const s={preview:'Previsão',consolidated:'Consolidado',paid:'Quitado',overdue:'Vencido'}[getStatus(t)];const c=t.type==='receita'?'#1a8c5c':t.type==='despesa_fixa'?'#c0112a':'#b55010';return`<tr><td>${fmtD(t.dueDate||t.date)}</td><td>${{receita:'Receita',despesa_fixa:'Desp. Fixa',despesa_variavel:'Desp. Variável'}[t.type]}</td><td>${t.description}</td><td>${t.category}</td><td style="text-align:right;color:${c};font-weight:600">${t.type==='receita'?'+':'-'} ${fmt(t.amount)}</td><td>${s}</td></tr>`;}).join('');
   const w=window.open('','_blank');
-  w.document.write(`<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Relatório Gerencial</title><style>body{font-family:'Segoe UI',sans-serif;color:#1a1a2e;padding:0;margin:0;background:#fff}.page{max-width:900px;margin:0 auto;padding:36px}.logo{font-size:22px;font-weight:800;letter-spacing:2px;color:#0d1f3c}.header{display:flex;justify-content:space-between;border-bottom:3px solid #0d1f3c;padding-bottom:14px;margin-bottom:20px}.meta{font-size:12px;color:#555;text-align:right}.kpis{display:grid;grid-template-columns:repeat(3,1fr);gap:11px;margin-bottom:20px}.kpi{border:1px solid #e0e4ee;border-radius:7px;padding:11px 13px}.kpi-lbl{font-size:9px;text-transform:uppercase;letter-spacing:1px;color:#888;margin-bottom:3px}.kpi-val{font-size:18px;font-weight:700}.green{color:#1a8c5c}.red{color:#c0112a}.orange{color:#b55010}.blue{color:#0d5fa8}h2{font-size:12px;font-weight:800;background:#0d1f3c;color:#fff;padding:8px 11px;letter-spacing:1px;text-transform:uppercase;margin:18px 0 0;border-radius:4px 4px 0 0}table{width:100%;border-collapse:collapse;font-size:12px}th{background:#f0f4fc;padding:7px 10px;text-align:left;font-size:9px;letter-spacing:1px;text-transform:uppercase;color:#555}td{padding:7px 10px;border-bottom:1px solid #eef1f8}tr:nth-child(even){background:#f9fbff}.footer{margin-top:26px;text-align:center;font-size:10px;color:#aaa;border-top:1px solid #e8edf4;padding-top:9px}@media print{body{-webkit-print-color-adjust:exact}}</style></head><body><div class="page"><div class="header"><div><div class="logo">🏛️ PECUNIA</div><div style="font-size:11px;color:#888;margin-top:3px">Relatório Gerencial Financeiro</div></div><div class="meta"><strong>Emitido:</strong> ${now}<br><strong>Período:</strong> ${pLbl()}</div></div><div class="kpis"><div class="kpi"><div class="kpi-lbl">Receitas Consol.</div><div class="kpi-val green">${fmt(T.rec.consolidated)}</div></div><div class="kpi"><div class="kpi-lbl">Despesas Consol.</div><div class="kpi-val red">${fmt(tDC)}</div></div><div class="kpi"><div class="kpi-lbl">Saldo Líquido</div><div class="kpi-val ${saldo>=0?'green':'red'}">${fmt(saldo)}</div></div><div class="kpi"><div class="kpi-lbl">Rec. Previstas</div><div class="kpi-val blue">${fmt(T.rec.preview)}</div></div><div class="kpi"><div class="kpi-lbl">Total Quitado</div><div class="kpi-val green">${fmt(T.df.paid+T.dv.paid)}</div></div><div class="kpi"><div class="kpi-lbl">Desp. Vencidas</div><div class="kpi-val orange">${fmt(ovAll.reduce((a,t)=>a+t.amount,0))}</div></div></div>${ovAll.length?`<h2>⚠ VENCIDAS</h2><table><tr><th>Venc.</th><th>Descrição</th><th>Categoria</th><th>Valor</th></tr>${ovAll.map(t=>`<tr><td>${fmtD(t.dueDate)}</td><td>${t.description}</td><td>${t.category}</td><td style="color:#c0112a;font-weight:600">${fmt(t.amount)}</td></tr>`).join('')}</table>`:''}<h2>LANÇAMENTOS</h2><table><tr><th>Data</th><th>Tipo</th><th>Descrição</th><th>Categoria</th><th>Valor</th><th>Status</th></tr>${rows}</table><div class="footer">Pecunia · ${now}</div></div></body></html>`);
+  w.document.write(`<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Relatório Gerencial</title><style>body{font-family:'Segoe UI',sans-serif;color:#1a1a2e;padding:0;margin:0;background:#fff}.page{max-width:900px;margin:0 auto;padding:36px}.logo{font-size:22px;font-weight:800;letter-spacing:2px;color:#0d1f3c}.header{display:flex;justify-content:space-between;border-bottom:3px solid #0d1f3c;padding-bottom:14px;margin-bottom:20px}.meta{font-size:12px;color:#555;text-align:right}.kpis{display:grid;grid-template-columns:repeat(3,1fr);gap:11px;margin-bottom:20px}.kpi{border:1px solid #e0e4ee;border-radius:7px;padding:11px 13px}.kpi-lbl{font-size:9px;text-transform:uppercase;letter-spacing:1px;color:#888;margin-bottom:3px}.kpi-val{font-size:18px;font-weight:700}.green{color:#1a8c5c}.red{color:#c0112a}.orange{color:#b55010}.blue{color:#0d5fa8}h2{font-size:12px;font-weight:800;background:#0d1f3c;color:#fff;padding:8px 11px;letter-spacing:1px;text-transform:uppercase;margin:18px 0 0;border-radius:4px 4px 0 0}table{width:100%;border-collapse:collapse;font-size:12px}th{background:#f0f4fc;padding:7px 10px;text-align:left;font-size:9px;letter-spacing:1px;text-transform:uppercase;color:#555}td{padding:7px 10px;border-bottom:1px solid #eef1f8}tr:nth-child(even){background:#f9fbff}.footer{margin-top:26px;text-align:center;font-size:10px;color:#aaa;border-top:1px solid #e8edf4;padding-top:9px}@media print{body{-webkit-print-color-adjust:exact}}</style></head><body><div class="page"><div class="header"><div><div class="logo">💼 REFLEX</div><div style="font-size:11px;color:#888;margin-top:3px">Relatório Gerencial Financeiro</div></div><div class="meta"><strong>Emitido:</strong> ${now}<br><strong>Período:</strong> ${pLbl()}</div></div><div class="kpis"><div class="kpi"><div class="kpi-lbl">Receitas Consol.</div><div class="kpi-val green">${fmt(T.rec.consolidated)}</div></div><div class="kpi"><div class="kpi-lbl">Despesas Consol.</div><div class="kpi-val red">${fmt(tDC)}</div></div><div class="kpi"><div class="kpi-lbl">Saldo Líquido</div><div class="kpi-val ${saldo>=0?'green':'red'}">${fmt(saldo)}</div></div><div class="kpi"><div class="kpi-lbl">Rec. Previstas</div><div class="kpi-val blue">${fmt(T.rec.preview)}</div></div><div class="kpi"><div class="kpi-lbl">Total Quitado</div><div class="kpi-val green">${fmt(T.df.paid+T.dv.paid)}</div></div><div class="kpi"><div class="kpi-lbl">Desp. Vencidas</div><div class="kpi-val orange">${fmt(ovAll.reduce((a,t)=>a+t.amount,0))}</div></div></div>${ovAll.length?`<h2>⚠ VENCIDAS</h2><table><tr><th>Venc.</th><th>Descrição</th><th>Categoria</th><th>Valor</th></tr>${ovAll.map(t=>`<tr><td>${fmtD(t.dueDate)}</td><td>${t.description}</td><td>${t.category}</td><td style="color:#c0112a;font-weight:600">${fmt(t.amount)}</td></tr>`).join('')}</table>`:''}<h2>LANÇAMENTOS</h2><table><tr><th>Data</th><th>Tipo</th><th>Descrição</th><th>Categoria</th><th>Valor</th><th>Status</th></tr>${rows}</table><div class="footer">REFLEX · ${now}</div></div></body></html>`);
   w.document.close();setTimeout(()=>w.print(),500);
 }
 
@@ -1070,7 +1184,7 @@ function confirmarBalanco(){
   const S=a=>a.reduce((s,t)=>s+t.amount,0);const tR=S(aR),tDF=S(aDF),tDV=S(aDV),tD=tDF+tDV,res=tR-tD;
   const tPd=S(aDF.filter(t=>t.paid))+S(aDV.filter(t=>t.paid)),tPn=S(aDF.filter(t=>!t.paid))+S(aDV.filter(t=>!t.paid));
   const w=window.open('','_blank');
-  w.document.write(`<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Balanço Patrimonial</title><style>body{font-family:'Segoe UI',sans-serif;color:#1a1a2e;padding:0;background:#fff}.page{max-width:820px;margin:0 auto;padding:36px}.logo{font-size:22px;font-weight:800;letter-spacing:2px;color:#0d1f3c}.header{display:flex;justify-content:space-between;border-bottom:3px solid #0d1f3c;padding-bottom:14px;margin-bottom:22px}.meta{font-size:12px;color:#555;text-align:right}h2{font-size:11px;font-weight:800;background:#0d1f3c;color:#fff;padding:8px 12px;margin:16px 0 0;border-radius:4px 4px 0 0;letter-spacing:1px;text-transform:uppercase}.section{border:1px solid #d0d8e8;border-top:none;border-radius:0 0 4px 4px;margin-bottom:14px}.row{display:flex;justify-content:space-between;padding:7px 12px;font-size:12px;border-bottom:1px solid #f0f2f8}.row:last-child{border-bottom:none}.row.total{background:#f0f4fc;font-weight:700;font-size:13px}.row.resultado{background:#0d1f3c;color:#fff;font-weight:700;font-size:14px;padding:10px 12px}.green{color:#1a8c5c}.red{color:#c0112a}.obs{font-size:10px;color:#aaa;margin-top:20px;border-top:1px solid #e0e4ee;padding-top:9px;text-align:center}@media print{body{-webkit-print-color-adjust:exact}}</style></head><body><div class="page"><div class="header"><div><div class="logo">🏛️ PECUNIA</div><div style="font-size:11px;color:#888;margin-top:3px">Balanço Patrimonial</div></div><div class="meta"><strong>Emitido:</strong> ${now}<br><strong>Período:</strong> ${periodoLabel}</div></div><h2>ATIVO — RECEITAS</h2><div class="section">${aR.slice(0,25).map(t=>`<div class="row"><span>${t.description} <small style="color:#aaa">(${fmtD(t.date)})</small></span><span class="green">+ ${fmt(t.amount)}</span></div>`).join('')}${aR.length>25?`<div class="row"><span>... +${aR.length-25} lançamentos</span></div>`:''}<div class="row total"><span>TOTAL RECEITAS</span><span class="green">+ ${fmt(tR)}</span></div></div><h2>PASSIVO — DESPESAS FIXAS</h2><div class="section">${aDF.map(t=>`<div class="row"><span>${t.description} <small style="color:#aaa">(${fmtD(t.dueDate)})</small> <small style="color:${t.paid?'#1a8c5c':'#c0112a'}">${t.paid?'✓ QUITADO':'● PENDENTE'}</small></span><span class="red">- ${fmt(t.amount)}</span></div>`).join('')}<div class="row total"><span>TOTAL DESP. FIXAS</span><span class="red">- ${fmt(tDF)}</span></div></div><h2>PASSIVO — DESPESAS VARIÁVEIS</h2><div class="section">${aDV.map(t=>`<div class="row"><span>${t.description} <small style="color:#aaa">(${fmtD(t.dueDate)})</small> <small style="color:${t.paid?'#1a8c5c':'#c0112a'}">${t.paid?'✓ QUITADO':'● PENDENTE'}</small></span><span class="red">- ${fmt(t.amount)}</span></div>`).join('')}<div class="row total"><span>TOTAL DESP. VARIÁVEIS</span><span class="red">- ${fmt(tDV)}</span></div></div><h2>RESULTADO</h2><div class="section"><div class="row"><span>Total Receitas</span><span class="green">+ ${fmt(tR)}</span></div><div class="row"><span>Total Despesas</span><span class="red">- ${fmt(tD)}</span></div><div class="row"><span>Desp. Quitadas</span><span class="green">${fmt(tPd)}</span></div><div class="row"><span>Desp. Pendentes</span><span class="red">${fmt(tPn)}</span></div><div class="row resultado"><span>RESULTADO DO PERÍODO</span><span style="color:${res>=0?'#4ade80':'#ff6b6b'}">${res>=0?'+ ':'- '}${fmt(Math.abs(res))}</span></div></div><div class="obs">Pecunia · ${now}</div></div></body></html>`);
+  w.document.write(`<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Balanço Patrimonial</title><style>body{font-family:'Segoe UI',sans-serif;color:#1a1a2e;padding:0;background:#fff}.page{max-width:820px;margin:0 auto;padding:36px}.logo{font-size:22px;font-weight:800;letter-spacing:2px;color:#0d1f3c}.header{display:flex;justify-content:space-between;border-bottom:3px solid #0d1f3c;padding-bottom:14px;margin-bottom:22px}.meta{font-size:12px;color:#555;text-align:right}h2{font-size:11px;font-weight:800;background:#0d1f3c;color:#fff;padding:8px 12px;margin:16px 0 0;border-radius:4px 4px 0 0;letter-spacing:1px;text-transform:uppercase}.section{border:1px solid #d0d8e8;border-top:none;border-radius:0 0 4px 4px;margin-bottom:14px}.row{display:flex;justify-content:space-between;padding:7px 12px;font-size:12px;border-bottom:1px solid #f0f2f8}.row:last-child{border-bottom:none}.row.total{background:#f0f4fc;font-weight:700;font-size:13px}.row.resultado{background:#0d1f3c;color:#fff;font-weight:700;font-size:14px;padding:10px 12px}.green{color:#1a8c5c}.red{color:#c0112a}.obs{font-size:10px;color:#aaa;margin-top:20px;border-top:1px solid #e0e4ee;padding-top:9px;text-align:center}@media print{body{-webkit-print-color-adjust:exact}}</style></head><body><div class="page"><div class="header"><div><div class="logo">💼 REFLEX</div><div style="font-size:11px;color:#888;margin-top:3px">Balanço Patrimonial</div></div><div class="meta"><strong>Emitido:</strong> ${now}<br><strong>Período:</strong> ${periodoLabel}</div></div><h2>ATIVO — RECEITAS</h2><div class="section">${aR.slice(0,25).map(t=>`<div class="row"><span>${t.description} <small style="color:#aaa">(${fmtD(t.date)})</small></span><span class="green">+ ${fmt(t.amount)}</span></div>`).join('')}${aR.length>25?`<div class="row"><span>... +${aR.length-25} lançamentos</span></div>`:''}<div class="row total"><span>TOTAL RECEITAS</span><span class="green">+ ${fmt(tR)}</span></div></div><h2>PASSIVO — DESPESAS FIXAS</h2><div class="section">${aDF.map(t=>`<div class="row"><span>${t.description} <small style="color:#aaa">(${fmtD(t.dueDate)})</small> <small style="color:${t.paid?'#1a8c5c':'#c0112a'}">${t.paid?'✓ QUITADO':'● PENDENTE'}</small></span><span class="red">- ${fmt(t.amount)}</span></div>`).join('')}<div class="row total"><span>TOTAL DESP. FIXAS</span><span class="red">- ${fmt(tDF)}</span></div></div><h2>PASSIVO — DESPESAS VARIÁVEIS</h2><div class="section">${aDV.map(t=>`<div class="row"><span>${t.description} <small style="color:#aaa">(${fmtD(t.dueDate)})</small> <small style="color:${t.paid?'#1a8c5c':'#c0112a'}">${t.paid?'✓ QUITADO':'● PENDENTE'}</small></span><span class="red">- ${fmt(t.amount)}</span></div>`).join('')}<div class="row total"><span>TOTAL DESP. VARIÁVEIS</span><span class="red">- ${fmt(tDV)}</span></div></div><h2>RESULTADO</h2><div class="section"><div class="row"><span>Total Receitas</span><span class="green">+ ${fmt(tR)}</span></div><div class="row"><span>Total Despesas</span><span class="red">- ${fmt(tD)}</span></div><div class="row"><span>Desp. Quitadas</span><span class="green">${fmt(tPd)}</span></div><div class="row"><span>Desp. Pendentes</span><span class="red">${fmt(tPn)}</span></div><div class="row resultado"><span>RESULTADO DO PERÍODO</span><span style="color:${res>=0?'#4ade80':'#ff6b6b'}">${res>=0?'+ ':'- '}${fmt(Math.abs(res))}</span></div></div><div class="obs">REFLEX · ${now}</div></div></body></html>`);
   w.document.close();setTimeout(()=>w.print(),500);
 }
 
