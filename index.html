@@ -463,21 +463,31 @@ tbody td{padding:10px 11px;font-size:12px;color:var(--gray-200);vertical-align:m
 const LS_ACCT = 'lf_account_cache';   // cache local da conta
 const LS_TX   = 'lf_tx_cache';        // cache local das transações
 
-let SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwYVyJY5KhixjVI73cDfKgWOT1zdqQ2AaLfS8xHfFdgoBYPjmzfDuAF1KSgoJM8zF6y1w/exec';
+let SCRIPT_URL = 'https://script.google.com/macros/s/AKfycby1mRUqAHb91MRL8-dauBF_g7hw0xXa_SKw-pSU2roR-QJTK56d6rNGUG_QTMbBwHOaBA/exec';
 
 /* ══════════════════════════════════════════════════
    API — Google Sheets via Apps Script
 ══════════════════════════════════════════════════ */
-async function apiCall(action, payload) {
-  let url = SCRIPT_URL + '?action=' + action;
-  if (payload) url += '&payload=' + encodeURIComponent(JSON.stringify(payload));
+// GET — leitura
+async function apiGet(action) {
+  const url = SCRIPT_URL + '?action=' + (action || 'getData');
   const res = await fetch(url, { cache: 'no-store' });
   if (!res.ok) throw new Error('HTTP ' + res.status);
   return res.json();
 }
 
+// POST sem Content-Type → text/plain → sem preflight CORS
+async function apiPost(body) {
+  const res = await fetch(SCRIPT_URL, {
+    method: 'POST',
+    body: JSON.stringify(body)
+  });
+  if (!res.ok) throw new Error('HTTP ' + res.status);
+  return res.json();
+}
+
 async function apiPing() {
-  return apiCall('ping');
+  return apiGet('ping');
 }
 
 /* ══════════════════════════════════════════════════
@@ -503,7 +513,7 @@ async function loadData() {
   setLoading('Carregando dados…');
   if (!SCRIPT_URL) { loadCache(); return; }
   try {
-    const data = await apiCall('getData');
+    const data = await apiGet('getData');
     tx   = data.transactions || [];
     acct = { ...acct, ...(data.account || {}) };
     cacheLocal();
@@ -521,8 +531,8 @@ async function saveData({ what = 'all', silent = false } = {}) {
     if (!SCRIPT_URL) return;
     if (!silent) showSaveStatus('saving', '⟳  Salvando…');
     try {
-      if (what === 'all' || what === 'tx')   await apiCall('saveTx',   { transactions: tx });
-      if (what === 'all' || what === 'acct') await apiCall('saveAcct', { account: acct });
+      if (what === 'all' || what === 'tx')   await apiPost({ action: 'saveTx',   transactions: tx });
+      if (what === 'all' || what === 'acct') await apiPost({ action: 'saveAcct', account: acct });
       if (!silent) showSaveStatus('saved', '✓  Salvo');
     } catch(e) {
       if (!silent) showSaveStatus('error', '✗  Falha ao salvar');
