@@ -876,14 +876,17 @@ function cardArrastes(arrastes, total){
   const rows = arrastes
     .sort((a,b)=>a.dueDate.localeCompare(b.dueDate))
     .map(d=>`
-    <div class="indicator-row">
-      <div>
+    <div class="indicator-row" style="align-items:center">
+      <div style="flex:1">
         <div style="font-size:13px;color:var(--white);font-weight:500">${d.description}</div>
         <div style="font-size:11px;color:var(--gray-400)">${d.category} · Venceu ${fmtD(d.dueDate)}</div>
       </div>
-      <div style="text-align:right">
-        <div class="indicator-value" style="color:var(--orange)">${fmt(d.amount)}</div>
-        <div style="font-size:10px;margin-top:2px">${badge(getStatus(d))}</div>
+      <div style="display:flex;align-items:center;gap:10px;flex-shrink:0">
+        <div style="text-align:right">
+          <div class="indicator-value" style="color:var(--orange)">${fmt(d.amount)}</div>
+          <div style="font-size:10px;margin-top:2px">${badge(getStatus(d))}</div>
+        </div>
+        <button class="btn-icon pay" onclick="payArraste('${d.id}')" title="Quitar esta despesa">💳 Quitar</button>
       </div>
     </div>`).join('');
   return`
@@ -895,6 +898,16 @@ function cardArrastes(arrastes, total){
     <div style="font-size:11px;color:var(--gray-500);margin-bottom:10px">${arrastes.length} despesa(s) consolidada(s), vencida(s) e não quitada(s) de períodos anteriores</div>
     ${rows}
   </div>`;
+}
+
+function payArraste(id){
+  const t=tx.find(x=>x.id===id);
+  if(!t) return;
+  t.paid=true;
+  t.paidDate=tod();
+  saveData({what:'tx'});
+  toast('Despesa quitada! Saldo atualizado.','success');
+  render();
 }
 
 function vencHoje(){
